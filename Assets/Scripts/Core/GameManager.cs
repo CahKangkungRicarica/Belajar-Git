@@ -1,11 +1,21 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 public class GameManager : MonoBehaviour
 {
+    void ClearConsole()
+    {
+        #if UNITY_EDITOR
+        var LogEntries = System.Type.GetType("UnityEditor.LogEntries, UnityEditor.dll");
+        var ClearMethod = LogEntries.GetMethod("Clear", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+        ClearMethod.Invoke(null, null);
+        #endif
+    }
     public static GameManager Instance;
-
-    public GameState currentState;
+     public GameState currentState;
 
     void Awake()
     {
@@ -14,45 +24,60 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        UpdateState (GameState.MainMenu); 
+        currentState = GameState.Playing;
+        Time.timeScale = 1f;
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (currentState == GameState.Playing && Input.GetKeyDown(KeyCode.Escape))
         {
-            if (currentState == GameState.Playing) UpdateState(GameState.Paused);
-            else if (currentState == GameState.Paused) UpdateState(GameState.Playing);
+            PauseGame();
+        }
+        else if (currentState == GameState.Paused && Input.GetKeyDown(KeyCode.Escape))
+        {
+            ResumeGame();
+        }
+        else if (currentState == GameState.GameOver && Input.GetKeyDown(KeyCode.R))
+        {
+            RestartGame();
+        }
+        else if (currentState == GameState.GameOver && Input.GetKeyDown(KeyCode.M))
+        {
+            BackToMenu();
         }
     }
 
-    public void UpdateState(GameState newState)
+    public void PauseGame()
     {
-        currentState = newState;
-
-        switch (newState)
-        {
-            case GameState.MainMenu:
-                Time.timeScale = 1f;
-                break;
-            case GameState.Playing:
-                Time.timeScale = 1f;
-                break;
-            case GameState.Paused:
-                Time.timeScale = 0f;
-                break;
-            case GameState.GameOver:
-                Time.timeScale = 0f;
-                break;
-        }
+        Time.timeScale = 0f;
+        currentState = GameState.Paused;
+    }
+    public void ResumeGame()
+    {
+        Time.timeScale = 1f;
+        currentState = GameState.Playing;
     }
 
-    public void StartGame() => UpdateState(GameState.Playing);
-    public void ResumeGame() => UpdateState(GameState.Playing);
-    
+    public void GameOver()
+    {
+        Debug.Log("Game Over");
+        currentState = GameState.GameOver;
+        Time.timeScale = 0f;
+    }
+
     public void RestartGame()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); 
+        ClearConsole();
+
+    }
+
+    public void BackToMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
+        ClearConsole(); 
     }
 }
