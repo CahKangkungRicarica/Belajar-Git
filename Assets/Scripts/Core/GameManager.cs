@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
         #endif
     }
     public static GameManager Instance;
+    // disini kuning soalnya kehapus tadi pak
      public GameState currentState;
 
     void Awake()
@@ -25,6 +26,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         currentState = GameState.Playing;
+
         Time.timeScale = 1f;
     }
 
@@ -35,6 +37,7 @@ public class GameManager : MonoBehaviour
             PauseGame();
         }
         else if (currentState == GameState.Paused && Input.GetKeyDown(KeyCode.Escape))
+        // nambahin fitur pause bisa resume lagi, tadi abis debugging gabisa resume lagi
         {
             ResumeGame();
         }
@@ -51,11 +54,13 @@ public class GameManager : MonoBehaviour
     public void PauseGame()
     {
         Time.timeScale = 0f;
+
         currentState = GameState.Paused;
     }
     public void ResumeGame()
     {
         Time.timeScale = 1f;
+
         currentState = GameState.Playing;
     }
 
@@ -63,20 +68,27 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Game Over");
         currentState = GameState.GameOver;
+
         Time.timeScale = 0f;
     }
 
     public void RestartGame()
     {
         Time.timeScale = 1f;
+
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); 
+        //3. saya menambahkan core class agar lebih gampang pak.
+        // sekalian nambahin pause restart fix game over.
         ClearConsole();
+        // console nya ganggu, 
+        // tak buat clear console menggunakan unity editor. diajarin temen
 
     }
 
     public void BackToMenu()
     {
         Time.timeScale = 1f;
+
         SceneManager.LoadScene("MainMenu");
         ClearConsole(); 
     }
